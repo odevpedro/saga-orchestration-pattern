@@ -21,14 +21,23 @@ import java.util.Map;
 @RequiredArgsConstructor //construtor apenas com atributos nescessários
 public class KafkaConfig {
 
+    private static final Integer PARTITION_COUNT = 1;
+    private static final Integer REPLICA_COUNT = 1;
+
     @Value("${spring.kafka.bootstrap-servers}")
     private String bootstrapServers;
 
-    @Value("${spring.kafka.consumer-group-id}")
+    @Value("${spring.kafka.consumer.group-id}")
     private String groupId;
 
     @Value("${spring.kafka.consumer.auto-offset-reset}")
     private String autoOffsetReset;
+
+    @Value("${spring.kafka.topic.start-saga}")
+    private String startSagaTopíc;
+
+    @Value("${spring.kafka.topic.notify-ending}")
+    private String notifyEndingTopic;
 
     @Bean
     public ConsumerFactory<String, String> consumerFactory() {
@@ -69,6 +78,24 @@ public class KafkaConfig {
         return new KafkaTemplate<>(producerFactory);
 
         }
+
+
+    private NewTopic buildTopic(String name) {
+        return TopicBuilder.
+                name(name).
+                replicas(REPLICA_COUNT).
+                partitions(PARTITION_COUNT).build();
+    }
+
+    @Bean
+    public NewTopic startSagaTopic() {
+        return buildTopic(startSagaTopíc);
+    }
+
+    @Bean
+    public NewTopic notifyEndingTopic(){
+        return buildTopic(notifyEndingTopic);
+    }
 
 
 }
